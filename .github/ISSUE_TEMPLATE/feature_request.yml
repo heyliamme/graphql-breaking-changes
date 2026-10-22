@@ -1,0 +1,15 @@
+name: Feature request
+description: Suggest a change to detect, or something the extension should do
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to catch or do?
+      description: The situation and what gets in the way today. For a new kind of change, a small before/after schema helps.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would help?

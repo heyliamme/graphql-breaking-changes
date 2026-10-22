@@ -1,0 +1,178 @@
+"""
+The bookshop API, version 1.
+"""
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+"""
+Where everything starts.
+"""
+type Query {
+  book(id: ID!): Book
+  books(first: Int = 20, after: String, genre: Genre, sort: BookSort = TITLE): BookConnection!
+  search(term: String!): [SearchResult!]!
+  author(id: ID!): Author
+  "The signed-in customer."
+  me: Customer
+  orders(status: OrderStatus): [Order!]!
+}
+
+type Mutation {
+  addBook(input: AddBookInput!): Book!
+  placeOrder(input: PlaceOrderInput!): Order!
+  cancelOrder(id: ID!): Order @deprecated(reason: "Use updateOrder")
+  updateOrder(id: ID!, status: OrderStatus!): Order!
+}
+
+interface Node {
+  id: ID!
+}
+
+interface Product {
+  id: ID!
+  title: String!
+  price: Money!
+}
+
+type Book implements Node & Product {
+  id: ID!
+  title: String!
+  subtitle: String
+  isbn: String!
+  price: Money!
+  author: Author!
+  genre: Genre!
+  pages: Int
+  tags: [String!]!
+  reviews(first: Int = 5): [Review!]!
+  publishedAt: DateTime
+  "Average rating, 1 to 5."
+  rating: Float
+}
+
+type Author implements Node {
+  id: ID!
+  name: String!
+  books: [Book!]!
+  bio: String
+  born: Int
+}
+
+type Review {
+  id: ID!
+  stars: Int!
+  body: String
+  reviewer: Customer!
+}
+
+type Customer implements Node {
+  id: ID!
+  email: String!
+  name: String
+  orders: [Order!]!
+  loyalty: LoyaltyTier
+}
+
+type Order implements Node {
+  id: ID!
+  items: [OrderItem!]!
+  status: OrderStatus!
+  total: Money!
+  placedAt: DateTime!
+  note: String
+}
+
+type OrderItem {
+  book: Book!
+  quantity: Int!
+}
+
+type BookConnection {
+  edges: [BookEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type BookEdge {
+  node: Book!
+  cursor: String!
+}
+
+type PageInfo {
+  hasNextPage: Boolean!
+  endCursor: String
+}
+
+type Money {
+  amount: Int!
+  currency: Currency!
+}
+
+union SearchResult = Book | Author
+
+enum Genre {
+  FICTION
+  NONFICTION
+  SCIENCE
+  HISTORY
+  CHILDREN
+}
+
+enum BookSort {
+  TITLE
+  PRICE
+  PUBLISHED
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum Currency {
+  USD
+  EUR
+  GBP
+}
+
+enum LoyaltyTier {
+  BRONZE
+  SILVER
+  GOLD
+}
+
+enum Role {
+  CUSTOMER
+  STAFF
+  ADMIN
+}
+
+input AddBookInput {
+  title: String!
+  isbn: String!
+  authorId: ID!
+  genre: Genre!
+  price: Int!
+  currency: Currency = USD
+  tags: [String!]
+}
+
+input PlaceOrderInput {
+  items: [OrderItemInput!]!
+  note: String
+  coupon: String
+}
+
+input OrderItemInput {
+  bookId: ID!
+  quantity: Int = 1
+}
+
+scalar DateTime @specifiedBy(url: "https://scalars.graphql.org/andimarek/date-time")
+
+directive @auth(role: Role = CUSTOMER) on FIELD_DEFINITION | OBJECT

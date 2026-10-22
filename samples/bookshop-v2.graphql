@@ -1,0 +1,196 @@
+"""
+The bookshop API, version 2.
+"""
+schema {
+  query: Query
+  mutation: Mutation
+  subscription: Subscription
+}
+
+"""
+Where everything starts.
+"""
+type Query {
+  book(id: ID!): Book
+  books(first: Int!, after: String, genre: Genre, sort: BookSort = TITLE): BookConnection!
+  search(term: String!, limit: Int = 10): [SearchResult!]!
+  "The customer whose token was sent."
+  me: Customer
+  orders(status: [OrderStatus!]): [Order!]!
+  bestsellers: [Book!]!
+}
+
+type Mutation {
+  addBook(input: AddBookInput!): Book!
+  deleteBook(id: ID!): Boolean!
+  placeOrder(input: PlaceOrderInput!): Order!
+  updateOrder(id: ID!, status: OrderStatus!): Order! @auth(role: STAFF)
+}
+
+type Subscription {
+  orderUpdated(id: ID!): Order!
+}
+
+interface Node {
+  id: ID!
+}
+
+interface Product {
+  id: ID!
+  title: String!
+  price: Money!
+}
+
+type Book implements Node & Product {
+  id: ID!
+  title: String!
+  subtitle: String
+  isbn: String
+  price: Money!
+  author: Author!
+  genre: Genre!
+  pages: String
+  tags: [String!]!
+  reviews(first: Int = 10, after: String): [Review!]!
+  publishedAt: DateTime
+  "Average rating, 1 to 5."
+  rating: Float!
+  description: String
+  publisher: Publisher
+}
+
+type Author {
+  id: ID!
+  name: String!
+  books: [Book!]!
+  bio: String
+  born: Int @deprecated(reason: "Use birthDate")
+  birthDate: DateTime
+}
+
+type Review implements Node {
+  id: ID!
+  stars: Int!
+  body: String
+  reviewer: Customer!
+}
+
+type Publisher {
+  id: ID!
+  name: String!
+}
+
+type Customer implements Node {
+  id: ID!
+  email: String!
+  name: String
+  orders: [Order!]!
+  loyalty: LoyaltyTier
+}
+
+type Order implements Node {
+  id: ID!
+  items: [OrderItem!]!
+  status: OrderStatus!
+  total: Money!
+  placedAt: DateTime!
+  note: String
+}
+
+type OrderItem {
+  book: Book!
+  quantity: Int!
+}
+
+type BookConnection {
+  edges: [BookEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type BookEdge {
+  node: Book!
+  cursor: String!
+}
+
+type PageInfo {
+  hasNextPage: Boolean!
+  endCursor: String
+}
+
+type Money {
+  amount: Int!
+  currency: Currency!
+}
+
+union SearchResult = Book | Review
+
+enum Genre {
+  FICTION
+  NONFICTION
+  SCIENCE
+  HISTORY
+  POETRY
+}
+
+enum BookSort {
+  TITLE
+  PRICE
+  PUBLISHED
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+"""
+ISO 4217 codes.
+"""
+enum Currency {
+  USD
+  EUR
+  GBP
+}
+
+enum LoyaltyTier {
+  BRONZE
+  SILVER
+  GOLD
+}
+
+enum Role {
+  CUSTOMER
+  STAFF
+  ADMIN
+  SUPPORT
+}
+
+input AddBookInput {
+  title: String!
+  isbn: String!
+  authorId: ID!
+  genre: Genre!
+  price: Int!
+  currency: Currency
+  tags: [String!]
+  publishedAt: DateTime!
+}
+
+input PlaceOrderInput {
+  items: [OrderItemInput!]!
+  note: String @deprecated(reason: "Notes are no longer read")
+}
+
+input OrderItemInput {
+  bookId: ID!
+  quantity: Int! = 1
+}
+
+scalar DateTime @specifiedBy(url: "https://tools.ietf.org/html/rfc3339")
+
+directive @auth(role: Role = CUSTOMER) repeatable on FIELD_DEFINITION

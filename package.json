@@ -1,0 +1,307 @@
+{
+  "name": "graphql-breaking-changes",
+  "displayName": "GraphQL Breaking Changes",
+  "description": "Diff two versions of a GraphQL schema and see what changed for API clients, with breaking changes flagged. Compare with any Git branch or tag, another file, or an open diff; SDL, split schemas and introspection JSON.",
+  "version": "0.1.0",
+  "publisher": "heyliam",
+  "license": "MIT",
+  "icon": "media/icon.png",
+  "galleryBanner": {
+    "color": "#1a1530",
+    "theme": "dark"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/heyliamme/graphql-breaking-changes"
+  },
+  "bugs": {
+    "url": "https://github.com/heyliamme/graphql-breaking-changes/issues"
+  },
+  "homepage": "https://github.com/heyliamme/graphql-breaking-changes#readme",
+  "qna": "https://github.com/heyliamme/graphql-breaking-changes/issues",
+  "pricing": "Free",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Linters",
+    "Visualization",
+    "Other"
+  ],
+  "keywords": [
+    "graphql",
+    "graphql schema",
+    "schema diff",
+    "graphql diff",
+    "breaking changes",
+    "api diff",
+    "api changelog",
+    "sdl",
+    "introspection",
+    "federation"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onLanguage:graphql",
+    "onLanguage:json",
+    "onLanguage:jsonc",
+    "onWebviewPanel:graphqlBreakingChanges"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": "limited",
+      "restrictedConfigurations": [
+        "graphqlBreakingChanges.ignore",
+        "graphqlBreakingChanges.baseRef",
+        "graphqlBreakingChanges.schemaFiles"
+      ],
+      "description": "In Restricted Mode, ignore rules, the baseline ref and the schema file pattern from the workspace are not applied, so a repository can't hide its own breaking changes, and nothing that needs Git runs."
+    },
+    "virtualWorkspaces": {
+      "supported": "limited",
+      "description": "Comparing with a Git ref, split schemas and the Problems panel check need a local Git repository."
+    }
+  },
+  "contributes": {
+    "languages": [
+      {
+        "id": "graphql",
+        "aliases": [
+          "GraphQL"
+        ],
+        "extensions": [
+          ".graphql",
+          ".graphqls",
+          ".gql"
+        ]
+      }
+    ],
+    "commands": [
+      {
+        "command": "graphqlBreakingChanges.compareWithRef",
+        "title": "Compare with Git Branch or Tag…",
+        "category": "GraphQL Breaking Changes",
+        "icon": "$(git-compare)"
+      },
+      {
+        "command": "graphqlBreakingChanges.compareWithHead",
+        "title": "Compare with HEAD",
+        "category": "GraphQL Breaking Changes"
+      },
+      {
+        "command": "graphqlBreakingChanges.compareWithFile",
+        "title": "Compare with Another Schema…",
+        "category": "GraphQL Breaking Changes"
+      },
+      {
+        "command": "graphqlBreakingChanges.releaseNotes",
+        "title": "Write Release Notes…",
+        "category": "GraphQL Breaking Changes",
+        "icon": "$(output)"
+      },
+      {
+        "command": "graphqlBreakingChanges.compareSelected",
+        "title": "Compare Schemas for Breaking Changes",
+        "category": "GraphQL Breaking Changes"
+      },
+      {
+        "command": "graphqlBreakingChanges.fromDiffEditor",
+        "title": "Check This Diff for Breaking Changes",
+        "category": "GraphQL Breaking Changes",
+        "icon": {
+          "light": "media/title-light.svg",
+          "dark": "media/title-dark.svg"
+        }
+      },
+      {
+        "command": "graphqlBreakingChanges.showBaselineReport",
+        "title": "Show Changes Since Baseline",
+        "category": "GraphQL Breaking Changes"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "graphqlBreakingChanges.compareWithRef",
+        "key": "ctrl+k b",
+        "mac": "cmd+k b",
+        "when": "!terminalFocus && !isInDiffEditor && graphqlBreakingChanges.isSchema"
+      },
+      {
+        "command": "graphqlBreakingChanges.fromDiffEditor",
+        "key": "ctrl+k b",
+        "mac": "cmd+k b",
+        "when": "isInDiffEditor && graphqlBreakingChanges.isSchema"
+      }
+    ],
+    "submenus": [
+      {
+        "id": "graphqlBreakingChanges.editorContext",
+        "label": "GraphQL Breaking Changes"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "graphqlBreakingChanges.compareSelected",
+          "when": "false"
+        },
+        {
+          "command": "graphqlBreakingChanges.compareWithRef",
+          "when": "graphqlBreakingChanges.isSchema && activeEditor != 'WebviewEditor'"
+        },
+        {
+          "command": "graphqlBreakingChanges.compareWithHead",
+          "when": "graphqlBreakingChanges.isSchema && activeEditor != 'WebviewEditor'"
+        },
+        {
+          "command": "graphqlBreakingChanges.compareWithFile",
+          "when": "graphqlBreakingChanges.isSchema && activeEditor != 'WebviewEditor'"
+        },
+        {
+          "command": "graphqlBreakingChanges.fromDiffEditor",
+          "when": "isInDiffEditor"
+        },
+        {
+          "command": "graphqlBreakingChanges.showBaselineReport",
+          "when": "graphqlBreakingChanges.isSchema"
+        },
+        {
+          "command": "graphqlBreakingChanges.releaseNotes",
+          "when": "graphqlBreakingChanges.isSchema && activeEditor != 'WebviewEditor'"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "graphqlBreakingChanges.compareSelected",
+          "when": "listMultiSelection && !explorerResourceIsFolder && resourceExtname =~ /^\\.(graphqls?|gql|json)$/",
+          "group": "3_compare@40"
+        }
+      ],
+      "editor/context": [
+        {
+          "submenu": "graphqlBreakingChanges.editorContext",
+          "when": "graphqlBreakingChanges.isSchema && !isInDiffEditor",
+          "group": "3_compare@20"
+        }
+      ],
+      "graphqlBreakingChanges.editorContext": [
+        {
+          "command": "graphqlBreakingChanges.compareWithHead",
+          "group": "1@1"
+        },
+        {
+          "command": "graphqlBreakingChanges.compareWithRef",
+          "group": "1@2"
+        },
+        {
+          "command": "graphqlBreakingChanges.compareWithFile",
+          "group": "1@3"
+        },
+        {
+          "command": "graphqlBreakingChanges.releaseNotes",
+          "group": "2@1"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "graphqlBreakingChanges.fromDiffEditor",
+          "when": "isInDiffEditor && graphqlBreakingChanges.isSchema",
+          "group": "navigation@-9"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "GraphQL Breaking Changes",
+      "properties": {
+        "graphqlBreakingChanges.ignore": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "anyOf": [
+              {
+                "type": "string",
+                "description": "A change id, such as `enum-value-added`. `*` matches any run of characters."
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Change id. `*` matches any run of characters, as in `*-description-changed`."
+                  },
+                  "type": {
+                    "type": "string",
+                    "description": "A type name, such as `User`, or `@key` for a directive. `*` matches any run of characters, as in `Internal*`."
+                  },
+                  "field": {
+                    "type": "string",
+                    "description": "A field, input field or enum value name on that type. `*` matches any run of characters."
+                  },
+                  "reason": {
+                    "type": "string",
+                    "description": "Why this is ignored. Shown in the report."
+                  }
+                }
+              }
+            ]
+          },
+          "markdownDescription": "Changes to leave out of the counts and the Problems panel. Each entry is a change id, or an object with any of `id`, `type` and `field`. Ignored changes stay visible in the report, dimmed. See the README for the list of ids.",
+          "scope": "resource"
+        },
+        "graphqlBreakingChanges.treatWarningsAsErrors": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Count dangerous changes (warnings) as breaking.",
+          "scope": "resource"
+        },
+        "graphqlBreakingChanges.schemaFiles": {
+          "type": "string",
+          "default": "**/*.{graphql,graphqls,gql}",
+          "markdownDescription": "For a schema split across files: a glob, matched relative to the folder of the file you compare, for the other SDL files that belong to the same schema (`**/*.{graphql,graphqls,gql}`, `types/*.graphql`). They are merged, with their `extend type` extensions, and read at the same Git version. Files holding only queries are left out. Empty compares the one file.",
+          "scope": "resource"
+        },
+        "graphqlBreakingChanges.baseRef": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "A Git branch, tag or commit to check open schema files against, such as `main` or `v2.0.0`. Breaking changes since that version show in the Problems panel. Empty turns the check off.",
+          "scope": "resource"
+        },
+        "graphqlBreakingChanges.problemsLevel": {
+          "type": "string",
+          "enum": [
+            "error",
+            "warning",
+            "info"
+          ],
+          "enumDescriptions": [
+            "Only breaking changes",
+            "Breaking and dangerous changes",
+            "Every change"
+          ],
+          "default": "warning",
+          "markdownDescription": "Which changes the `#graphqlBreakingChanges.baseRef#` check reports in the Problems panel.",
+          "scope": "resource"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "watch": "node scripts/build.mjs --watch",
+    "typecheck": "tsc --noEmit -p .",
+    "test": "tsc --noEmit -p . && node scripts/build.mjs && node --test test/*.test.mjs",
+    "package": "tsc --noEmit -p . && node scripts/build.mjs --prod && vsce package --no-dependencies",
+    "test:e2e": "npm run package && node test/e2e/run.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "@types/vscode": "^1.90.0",
+    "@vscode/codicons": "0.0.36",
+    "@vscode/vsce": "^4.0.0",
+    "esbuild": "^0.28.2",
+    "graphql": "^17.0.2",
+    "ovsx": "^1.3.0",
+    "typescript": "^7.0.2"
+  }
+}

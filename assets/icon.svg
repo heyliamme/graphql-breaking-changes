@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2a1f45"/>
+      <stop offset="1" stop-color="#161028"/>
+    </linearGradient>
+  </defs>
+  <rect x="8" y="8" width="240" height="240" rx="52" fill="url(#bg)"/>
+  <g transform="translate(128 128) scale(1.1) translate(-128 -128)">
+  <!-- a schema graph: a root type with three fields, each an edge to another type -->
+  <path d="M86 75 L156 75" stroke="#d6e2ea" stroke-width="12" stroke-linecap="round"/>
+  <path d="M86 128 L156 128" stroke="#d6e2ea" stroke-width="12" stroke-linecap="round"/>
+  <!-- the root type and the types it reaches -->
+  <circle cx="70" cy="75" r="18" fill="#3fbf9b"/>
+  <circle cx="70" cy="128" r="18" fill="#4d9bf0"/>
+  <circle cx="70" cy="181" r="18" fill="#ff6a55"/>
+  <circle cx="186" cy="75" r="14" fill="#d6e2ea"/>
+  <circle cx="186" cy="128" r="14" fill="#d6e2ea"/>
+  <!-- the edge that broke: snapped in two, the type at its end gone hollow -->
+  <path d="M88 181 L122 181" stroke="#ff6a55" stroke-width="12" stroke-linecap="round"/>
+  <path d="M158 181 L170 181" stroke="#ff6a55" stroke-width="12" stroke-linecap="round"/>
+  <path d="M139 164 L150 176 L137 186 L149 197 L140 210" fill="none" stroke="#ffd2c9" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="186" cy="181" r="11" fill="none" stroke="#ff6a55" stroke-width="7"/>
+  </g>
+</svg>
